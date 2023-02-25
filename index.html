@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Exoplanets Visualization</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <link rel="icon" href="favicon.png">
+  <link href="tabulator-master/dist/css/tabulator.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="grid-container">
+    <div id="sy_snum_container" class="grid-item">
+      <h1>Number of Stars in Exoplanet's System</h1>
+      <svg id="sy_snum_chart"></svg>
+      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="sy_snum_sorting">Reverse Order</button>
+      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="sy_snum_logScale">Log Scale</button>
+    </div>
+
+    <div id="sy_pnum_container" class="grid-item">
+      <h1>Number of Planets in Exoplanet's System</h1>
+      <svg id="sy_pnum_chart"></svg>
+      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="sy_pnum_sorting">Reverse Order</button>
+      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="sy_pnum_logScale">Log Scale</button>
+    </div>
+
+    <div id="st_spectype_container" class="grid-item">
+      <h1>Star Type</h1>
+      <svg id="st_spectype_chart"></svg>
+      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="st_spectype_sorting">Reverse Order</button>
+      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="st_spectype_logScale">Log Scale</button>
+    </div>
+
+    <div id="discoverymethod_container" class="grid-item">
+      <h1>Discovery Method</h1>
+      <svg id="discoverymethod_chart"></svg>
+      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="discoverymethod_sorting">Reverse Order</button>
+      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="discoverymethod_logScale">Log Scale</button>
+    </div>
+
+    <div id="data_table" class="grid-item">
+      <h1>Planet Data</h1>
+      <table></table>
+    </div>
+
+    <div id="habitable_container" class="grid-item">
+      <h1>Within Habitable Zone</h1>
+      <svg id="habitable_chart"></svg>
+      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="habitable_sorting">Reverse Order</button>
+      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="habitable_logScale">Log Scale</button>
+    </div>
+
+    <div id="distance_container" class="grid-item">
+      <h1>Distance from Earth</h1>
+      <svg id="distance_chart"></svg>
+    </div>
+
+    <div id="disc_year_container" class="grid-item">
+      <h1>Discovery Year</h1>
+      <svg id="discovery_year_chart"></svg>
+    </div>
+
+    <div id="radius_mass_container" class="grid-item">
+      <h1>Size</h1>
+      <svg id="radius_mass_chart"></svg>
+    </div>
+  </div>
+
+
+  <div id="tooltip"></div>
+
+  <script src="js/d3.min.js"></script>
+  <script type="text/javascript" src="tabulator-master/dist/js/tabulator.min.js"></script>
+  <script src="js/barchart.js"></script>
+  <script src="js/multibarchart.js"></script>
+  <script src="js/histogram.js"></script>
+  <script src="js/linechartfocus.js"></script>
+  <script src="js/scatterplot.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
