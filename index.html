@@ -7,69 +7,278 @@
   <meta name="description" content="" />
   <link rel="stylesheet" type="text/css" href="css/style.css" />
   <link rel="icon" href="favicon.png">
-  <link href="tabulator-master/dist/css/tabulator.min.css" rel="stylesheet">
+  <link href="tabulator-master/dist/css/tabulator_midnight.min.css" rel="stylesheet">
 </head>
 
 <body>
+  <div id="full-container">
   <div class="grid-container">
     <div id="sy_snum_container" class="grid-item">
-      <h1>Number of Stars in Exoplanet's System</h1>
+      <div class="chartH">
+        <h1>Stars in Exoplanet's System</h1>
+      </div>
       <svg id="sy_snum_chart"></svg>
-      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="sy_snum_sorting">Reverse Order</button>
-      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="sy_snum_logScale">Log Scale</button>
+      <div class="chartF">
+        <a type="button" class="buttons" id="sy_snum_logScale">Log Scale</a>
+      </div>
     </div>
 
     <div id="sy_pnum_container" class="grid-item">
-      <h1>Number of Planets in Exoplanet's System</h1>
+      <div class="chartH">
+        <h1>Planets in Exoplanet's System</h1>
+      </div>
       <svg id="sy_pnum_chart"></svg>
-      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="sy_pnum_sorting">Reverse Order</button>
-      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="sy_pnum_logScale">Log Scale</button>
+      <div class="chartF">
+        <a type="button" class="buttons" id="sy_pnum_logScale">Log Scale</a>
+      </div>
     </div>
 
     <div id="st_spectype_container" class="grid-item">
-      <h1>Star Type</h1>
+      <div class="chartH">
+        <h1>Star Type</h1>
+        <a href="https://en.wikipedia.org/wiki/Stellar_classification#Spectral_types" target="_blank">learn more</a>
+      </div>
       <svg id="st_spectype_chart"></svg>
-      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="st_spectype_sorting">Reverse Order</button>
-      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="st_spectype_logScale">Log Scale</button>
+      <div class="chartF">
+        <a type="button" class="buttons" id="st_spectype_logScale">Log Scale</a>
+      </div>
     </div>
 
     <div id="discoverymethod_container" class="grid-item">
-      <h1>Discovery Method</h1>
+      <div class="chartH">
+        <h1>Discovery Method</h1>
+        <a href="https://en.wikipedia.org/wiki/Methods_of_detecting_exoplanets" target="_blank">learn more</a>
+      </div>
       <svg id="discoverymethod_chart"></svg>
-      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="discoverymethod_sorting">Reverse Order</button>
-      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="discoverymethod_logScale">Log Scale</button>
+      <div class="chartF">
+        <a type="button" class="buttons" id="discoverymethod_logScale">Log Scale</a>
+      </div>
     </div>
 
-    <div id="data_table" class="grid-item">
-      <h1>Planet Data</h1>
-      <table></table>
+    <div id="data_table_container" class="grid-item">
+      <div class="chartH">
+        <div style="align-items:center;">
+          <div><h1>Planet Data</h1></div>
+        </div>
+      </div>
+      <div id="data_table"></div>
+      <div style="margin-top: 20px;"class="chartF">
+        <a type="button" class="buttons" id="help">help</a>
+        <a type="button" class="buttons" onclick="clearSelect()">clear filters</a>     
+      </div>
     </div>
 
     <div id="habitable_container" class="grid-item">
-      <h1>Within Habitable Zone</h1>
-      <svg id="habitable_chart"></svg>
-      <button type="button" class="btn btn-link btn-sm" class="sortButton" id="habitable_sorting">Reverse Order</button>
-      <button type="button" class="btn btn-link btn-sm" class="logScaleButton" id="habitable_logScale">Log Scale</button>
+      <div class="chartH">
+        <h1>Within Habitable Zone</h1>
+      </div>
+      <svg id="habitable_barchart"></svg>
+      <div class="chartF">
+        <a type="button" class="buttons" id="habitable_logScale">Log Scale</a>
+      </div>
     </div>
 
     <div id="distance_container" class="grid-item">
-      <h1>Distance from Earth</h1>
+      <div class="chartH">
+        <h1>Distance from Earth</h1>
+      </div>
       <svg id="distance_chart"></svg>
+      <div style="text-align: center;"><span class="additionalInfo">distance (parsec)</span></div>
+      <div class="chartF">
+        <a type="button" class="buttons" id="distance_logScale">Log Scale</a>
+      </div>
     </div>
 
     <div id="disc_year_container" class="grid-item">
-      <h1>Discovery Year</h1>
-      <svg id="discovery_year_chart"></svg>
+      <div class="chartH">
+        <h1>Discovery Year</h1>
+      </div>
+      <svg id="disc_year_chart"></svg>
+      <div class="chartF">
+        
+      </div>
     </div>
 
     <div id="radius_mass_container" class="grid-item">
-      <h1>Size</h1>
+      <div class="chartH">
+        <h1>Size Relative to Earth</h1>
+      </div>
       <svg id="radius_mass_chart"></svg>
+      <div class="chartF">
+        <a type="button" class="buttons" id="solr_filter">Filter Local Solar System</a>
+      </div>
     </div>
   </div>
 
+  <button id="temporary">tempButton</button>
+
 
   <div id="tooltip"></div>
+
+  <div id="help_modal" class="modal">
+    <div class="modal-content">
+      <span class ="close">&times;</span>
+      <div class="modalH">
+        <h1>Visualization Help</h1>
+      </div>
+      <div class="grid-container">
+        <div id="h_snum" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Stars in Exoplanet's System</h3>
+            <p>This graph shows how many planets (y-axis) have X amount of stars in its system (x-axis)</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the bars to filter by planets with X amount of stars in system</p></li>
+                <li><p>Click the log scale button to toggle log vs. linear scaling</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_size" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Size Relative to Earth</h3>
+            <p>This scatterplot shows the mass (y-axis) and radius (x-axis) of a given planet relative to Earth's measurements</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the bars to filter by planets with X amount of stars in system</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_pnum" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Planets in Exoplanet's System</h3>
+            <p>This graph shows how many planets (y-axis) have X amount of other exoplanets in its system (x-axis)</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the bars to filter by planets with X amount of other exoplanets in system</p></li>
+                <li><p>Click the log scale button to toggle log vs. linear scaling</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_discoverymethod" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Discovery Method</h3>
+            <p>This graph shows how many planets (y-axis) were discovered by each type of observational method (x-axis)</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the bars to filter by planets discovered by the observational method</p></li>
+                <li><p>Click the log scale button to toggle log vs. linear scaling</p></li>
+                <li><p>Click learn more to have a wikipedia article show more about the discovery methods</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_table" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Planet Data</h3>
+            <p>This table shows information about each planet</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the the planet row to have more information pop up</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_stype" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Star Type</h3>
+            <p>This table shows how many planets (y-axis) have a specific type of star (x-axis)</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the bars to filter by planets with each type of star</p></li>
+                <li><p>Click the log scale button to toggle log vs. linear scaling</p></li>
+                <li><p>Click learn more to have a wikipedia article show more about the start types</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_distance" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Distance from Earth</h3>
+            <p>This histogram shows how many planets (y-axis) are in a range of distances from Earth (x-axis) in parsecs</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the log scale button to toggle log vs. linear scaling</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_discyear" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Discovery Year</h3>
+            <p>This line graph shows how many planets (y-axis) were discovered in each year (x-axis)</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the log scale button to toggle log vs. linear scaling</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="h_habitable" class="grid-item">
+          <div class="modal_grid-text">
+            <h3>Within Habitable Zone</h3>
+            <p>This graph shows how many planets (y-axis) and their habitability status (x-axis)</p>
+            <div class="help-list">
+              <ul>
+                <li><p>Click the bars to filter by planets with each habitability status</p></li>
+                <li><p>Click the log scale button to toggle log vs. linear scaling</p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="info_modal" class="modal">
+    <div class="modal-content">
+      <span class ="close">&times;</span>
+      <div class="modalH">
+        <h1 id="RHeader">More Information</h1>
+      </div>
+      <div class="grid-container">
+        <div class="igrid-item">
+          <div class="imodal_grid-text">
+            <h1>Planet Type</h1>
+            <h2 id="i_ptype">planet type</h2>
+          </div>
+        </div>
+        <div class="igrid-item">
+          <div class="imodal_grid-text">
+            <h1>Planet Radius</h1>
+            <h2 id="i_prad">planet radius</h2>
+          </div>
+        </div>
+        <div class="igrid-item">
+          <div class="imodal_grid-text">
+            <h1>Star Type</h1>
+            <h2 id="i_stype">star type</h2>
+          </div>
+        </div>
+        <div class="igrid-item">
+          <div class="imodal_grid-text">
+            <h1>Star Radius</h1>
+            <h2 id="i_srad">star radius</h2>
+          </div>
+        </div>
+        <div class="igrid-item">
+          <div class="imodal_grid-text">
+            <h1>Star Mass</h1>
+            <h2 id="i_smass">distance from star</h2>
+          </div>
+        </div>
+        <div class="igrid-item">
+          <div class="imodal_grid-text">
+            <h1>Habitbailty Status</h1>
+            <h2 id="i_habitability">habitability</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
   <script src="js/d3.min.js"></script>
   <script type="text/javascript" src="tabulator-master/dist/js/tabulator.min.js"></script>

@@ -4,7 +4,7 @@
 var sy_snum_barchart;
 // Initialize chart and then show it
 var charts = [];
-var noformat_barcharts = ['sy_snum', 'sy_pnum', 'discoverymethod'];
+var noformat_barcharts = ['sy_snum', 'sy_pnum', 'discoverymethod', 'habitability'];
 d3.csv('data/exoplanets-1.csv')
   .then(data => {
     var init_table_data = [];
@@ -17,53 +17,57 @@ d3.csv('data/exoplanets-1.csv')
       d.pl_orbsmax = +d.pl_orbsmax;
       d.sy_dist = +d.sy_dist;
       d.disc_year = new Date(d.disc_year);
-      init_table_data.push({name: d.pl_name, distance: d.sy_dist, size: d.pl_bmasse});
+      init_table_data.push({name: d.pl_name, distance: d.sy_dist.toString() + " ps", disc_year: d.disc_year.getUTCFullYear()});
     });
+    all_data = data;
+    selected_filters = [];
+    filter_stars(all_data);
+    add_habitable();
     console.log(data[0]);
     
     sy_snum_barchart = new Barchart({ parentElement: '#sy_snum_chart', 
-                                    logRange: [110, 0]}, 
+                                    logRange: .5}, 
                                     format_barchart(data, "sy_snum"), 
                                     "sy_snum"); // d3 rollup length of values from sy_snum
     charts.push(sy_snum_barchart);
 
     sy_pnum_barchart = new Barchart({ parentElement: '#sy_pnum_chart', 
-                                    logRange: [130, 0]}, 
+                                    logRange: .5
+                                    }, 
                                     format_barchart(data, "sy_pnum"), 
                                     "sy_pnum");
     charts.push(sy_pnum_barchart);
 
     st_spectype_barchart = new Barchart({ parentElement: '#st_spectype_chart', 
-                                    logRange: [130, 0]}, 
-                                    format_barchart(filter_stars(data), "st_spectype"), 
+                                    logRange: .5,
+                                    containerHeight: 300}, 
+                                    format_barchart(data, "st_spectype"), 
                                     "st_spectype");
     charts.push(st_spectype_barchart);
 
     discoverymethod_barchart = new Barchart({ parentElement: '#discoverymethod_chart', 
-                                    logRange: [120, 0],
-                                    margin: {top: 10, right: 5, bottom: 100, left: 90},
-                                    containerHeight: 300},
+                                    logRange: .5,
+                                    margin: {top: 10, right: 5, bottom: 100, left: 40},
+                                    containerHeight: 300,
+                                    containerWidth: 400},
                                     format_barchart(data, "discoverymethod"), 
                                     "discoverymethod");
     charts.push(discoverymethod_barchart);
 
-    habitable_barchart = new Multi_Barchart({ parentElement: '#habitable_chart', 
-                                    logRange: [130, 0]}, 
-                                    habitability_format(data),
-                                    "x",
-                                    "y",
-                                    ['uninhabitable', 'habitable', 'undefined'],
+    habitable_barchart = new Barchart({ parentElement: '#habitable_barchart',
+                                        containerHeight:300}, 
+                                    format_barchart(data, "habitability"),
                                     "habitability");
     charts.push(habitable_barchart);
 
     distance_histogram = new Histogram({ parentElement: '#distance_chart'}, 
                                     data, 
-                                    "distance");
+                                    "sy_dist");
     charts.push(distance_histogram);
 
-    disc_year_linechart = new FocusContextVis({ parentElement: '#discovery_year_chart'}, 
+    disc_year_linechart = new FocusContextVis({ parentElement: '#disc_year_chart'}, 
                                     format_barchart(data, "disc_year"), 
-                                    "discovery_year");
+                                    "disc_year");
     charts.push(disc_year_linechart);
 
     radius_mass_scatterplot = new Scatterplot({ parentElement: '#radius_mass_chart'}, 
@@ -78,15 +82,16 @@ d3.csv('data/exoplanets-1.csv')
         pagination: "local",
         paginationSize: 15,
         columns:[
-            {title:"Name", field:"name"},
-            {title:"Distance from Earth", field:"distance"},
-            {title:"Size", field:"size"},
-            {title:"View More", field:"more"}
+            {title:"Name", field:"name", minWidth: 100},
+            {title:"Distance from Earth", field:"distance", width: 160},
+            {title:"Discovery Year", field:"disc_year", width: 130}
         ]
     })
-
-
-    console.log("charts:", charts);
+    table.on("rowClick", function(e, row){
+        tselect_data = row.getData().name;
+        populate_info_modal(tselect_data);
+        
+    })
 
     charts.forEach(chart => {
         custom_sort(chart);
@@ -101,27 +106,28 @@ d3.csv('data/exoplanets-1.csv')
     disc_year_linechart.updateVis();
     radius_mass_scatterplot.updateVis();
 
-    all_data = data;
   })
   .catch(error => {
         console.error(error);
   });
 
 function custom_sort(chart){
-    if(chart.type == "st_spectype" || chart.type == "discoverymethod"){
+    if(chart.type == "st_spectype"){
         chart.data.sort((a, b) => {
                         if(a.x < b.x){ return -1}
                         if(a.x > b.x){ return 1}
                         return 0;
                     });
     }
+    if(chart.type == "discoverymethod"){
+        chart.data.sort((a,b) => b.y - a.y);
+    }
     chart.data.sort((a,b) => a.x - b.x);
     return;
 }
 
-function habitability_format(data){
-    filteredData = filter_stars(data);
-    filteredData.forEach(d => {
+function add_habitable(){
+    all_data.forEach(d => {
         d.habitability = "uninhabitable";
         if(d.st_spectype == "A" && d.pl_orbsmax >= 8.5 && d.pl_orbsmax <= 12.5 ||
         d.st_spectype == "F" && d.pl_orbsmax >= 1.5 && d.pl_orbsmax <= 2.2 ||
@@ -134,26 +140,8 @@ function habitability_format(data){
             d.habitability = "undefined";
         }
     });
-    filteredDataGroups = d3.group(filteredData, d => d.st_spectype);
-    filteredDataGroups = Object.assign(Array.from(filteredDataGroups).map(([k, v]) => ({"group": k, "arr": v})));
-    definedData = filteredDataGroups.filter((d) => {return d.group != 'undefined'});
-    undefinedData = filteredDataGroups.filter((d) => {return d.group == 'undefined'});
-    dataObjects = [];
-    definedData.forEach(d =>{
-        dataObjects.push({
-            "uninhabitable": d.arr.filter((o) => {return o.habitability == 'uninhabitable'}).length,
-            "habitable": d.arr.filter((o) => {return o.habitability == 'habitable'}).length,
-            "undefined": d.arr.filter((o) => {return o.habitability == 'undefined'}).length,
-            "group": d.group
-        });
-    })
-    dataObjects.push({"undefined": undefinedData[0].arr.length, 
-                      "uninhabitable": 0,
-                      "habitable": 0,
-                      "group": "unknown"});
 
-
-    return dataObjects;
+    return all_data;
 }
 
 function filter_stars(data){
@@ -164,7 +152,6 @@ function filter_stars(data){
         }
         d.st_spectype = 'undefined';
     });
-    return data;
 }
 
 // Create an object from rolled up data and assign it to templated "x" and "y" fields
@@ -207,48 +194,86 @@ d3.select('#habitable_sorting').on('click', d => {
 // logscale
 
 d3.select('#sy_snum_logScale').on('click', d=> {
+    let ele = d3.select('#sy_snum_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
     sy_snum_barchart.config.logScale = !sy_snum_barchart.config.logScale;
     sy_snum_barchart.updateVis();
-})
+});
 d3.select('#sy_pnum_logScale').on('click', d=> {
+    let ele = d3.select('#sy_pnum_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
     sy_pnum_barchart.config.logScale = !sy_pnum_barchart.config.logScale;
     sy_pnum_barchart.updateVis();
-})
+});
 d3.select('#st_spectype_logScale').on('click', d=> {
+    let ele = d3.select('#st_spectype_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
     st_spectype_barchart.config.logScale = !st_spectype_barchart.config.logScale;
     st_spectype_barchart.updateVis();
-})
+});
 d3.select('#discoverymethod_logScale').on('click', d=> {
+    let ele = d3.select('#discoverymethod_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
     discoverymethod_barchart.config.logScale = !discoverymethod_barchart.config.logScale;
     discoverymethod_barchart.updateVis();
-})
+});
 d3.select('#habitable_logScale').on('click', d=> {
+    let ele = d3.select('#habitable_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
     habitable_barchart.config.logScale = !habitable_barchart.config.logScale;
     habitable_barchart.updateVis();
-})
+});
+d3.select('#distance_logScale').on('click', d=> {
+    let ele = d3.select('#distance_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
+    distance_histogram.config.logScale = !distance_histogram.config.logScale;
+    distance_histogram.updateVis();
+});
+d3.select('#solr_filter').on('click', d=> {
+    let ele = d3.select('#solr_filter')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
+    radius_mass_scatterplot.solr_filter = !radius_mass_scatterplot.solr_filter
+    radius_mass_scatterplot.updateVis();
+});
 
 
-function filtering_event(d, field){
-    console.log(d, field);
-    let filtered_data = handle_filter(d, field);
-    table.setData(all_data.filter(x => {return x[field] == d['x']}));
+
+function clearSelect(){
+    selected_filters = [];
+    filtering_event(all_data);
+}
+
+function filtering_event(filtered_data){
+    table.setData(format_tabulator(filtered_data));
     charts.forEach(chart => {
         if(noformat_barcharts.includes(chart.type)){
-            chart.data = format_barchart(handle_filter(d, field), chart.type);
+            chart.data = format_barchart(filtered_data, chart.type);
             custom_sort(chart);
             chart.updateVis();
         }
         if(chart.type == "st_spectype"){
-            chart.data = format_barchart(filter_stars(handle_filter(d, field)), "st_spectype")
+            chart.data = format_barchart(filtered_data, "st_spectype")
             custom_sort(chart);
             chart.updateVis();
         }
-        if(chart.type == "distance"){
-            chart.data = handle_filter(d, field);
+        if(chart.type == "sy_dist"){
+            chart.data = filtered_data;
             chart.updateVis();
         }
-        if(chart.type == "habitability"){
-            chart.data = habitability_format(handle_filter(d, field))
+        if(chart.type == "disc_year"){
+            chart.data = format_barchart(filtered_data, chart.type);
+            custom_sort(chart);
+            chart.updateVis();
+        }
+        if(chart.type == "radius_mass"){
+            chart.data = format_scatterplot(filtered_data, chart.type);
             custom_sort(chart);
             chart.updateVis();
         }
@@ -256,26 +281,140 @@ function filtering_event(d, field){
 }
 
 function handle_filter(d, field){
-    if(noformat_barcharts.includes(field) || field == "st_spectype"){
-        return all_data.filter(x => {return x[field] == d['x']});
+    update_selection(d, field);
+    filtered_data = all_data;
+    selected_filters.forEach( filter => {
+        if(noformat_barcharts.includes(filter.field) || filter.field == "st_spectype"){
+            filtered_data = filtered_data.filter(x => {return x[filter.field] == filter.d['x']});
+        }
+    })
+    filtering_event(filtered_data);
+}
+
+function update_selection(d, field){
+    if(selected_filters.length == 0){
+        selected_filters.push({"field": field, "d": d});
     }
-    return;
+    else{
+        let index = 0
+        let newFilter = true;
+        selected_filters.forEach( filter =>{
+            if(filter.field == field && filter.d['x'] == d['x']){
+                selected_filters.splice(index, 1);
+                newFilter = false;       
+            }
+            index++;
+        });
+        if(newFilter){
+            selected_filters.push({"field": field, "d": d});
+        }
+    }
+}
+
+function format_tabulator(data){
+    let tabulator_data = [];
+    data.forEach(d => {
+        tabulator_data.push({name: d.pl_name, distance: d.sy_dist.toString() + " ps", disc_year: d.disc_year.getUTCFullYear()});
+    });
+    return tabulator_data;
+}
+
+
+// Help Modal
+var modal = document.getElementById("help_modal");
+var help = document.getElementById("help");
+var close = document.getElementsByClassName("close")[0];
+var close2 = document.getElementsByClassName("close")[1];
+info_modal = document.getElementById("info_modal");
+var temp = document.getElementById("temporary");
+
+help.onclick = function(){
+    modal.style.display = "block";
+}
+close.onclick = function(){
+    modal.style.display = "none";
+    info_modal.style.display = "none";
+}
+window.onclick = function(event) {
+    if(event.target == modal || event.target == info_modal){
+        modal.style.display = "none";
+        info_modal.style.display = "none";
+    }
+}
+
+temp.onclick = function(){
+    populate_info_modal(all_data[0]);
+    info_modal.style.display = "block";
+}
+close2.onclick = function(){
+    modal.style.display = "none";
+    info_modal.style.display = "none";
+}
+
+function populate_info_modal(pl_name){
+    let data = all_data.filter(x => {return x.pl_name == pl_name});
+    data = clean_return_data(data);
+    let planetName = pl_name;
+    let planetType = get_planet_type(data[0]);
+    let planetRad = data[0].pl_rade + "x Earth";
+    let starType = data[0].st_spectype;
+    let starRad = data[0].st_rad + "x The Sun";
+    let starMass = data[0].st_mass + "x The Sun";
+    let habitability = data[0].habitability;
+
+    document.getElementById("RHeader").innerHTML = planetName;
+    document.getElementById("i_ptype").innerHTML = planetType;
+    document.getElementById("i_prad").innerHTML = planetRad;
+    document.getElementById("i_stype").innerHTML = starType;
+    document.getElementById("i_srad").innerHTML = starRad;
+    document.getElementById("i_smass").innerHTML = starMass;
+    document.getElementById("i_habitability").innerHTML = habitability;
+
+    info_modal.style.display = "block";
+}
+
+function get_planet_type(data){
+    if(data.pl_bmasse >= 50){
+        return "Gas Giant - Jovian"
+    }
+    if(data.pl_bmasse >= 10){
+        return "Gas Giant - Neptunian"
+    }
+    if(data.pl_bmasse >= 2){
+        return "Terrestrial - Superterran"
+    }
+    if(data.pl_bmasse >= .5){
+        return "Terrestrial - Terran"
+    }
+    if(data.pl_bmasse >= .1){
+        return "Terrestrial - Subterran"
+    }
+    if(data.pl_bmasse >= .00001){
+        return "Minor Planet - Mercurian"
+    }
+    if(data.pl_bmasse <= .00001){
+        return "Minor Planet - Asteroidan"
+    }
+    return "N/A"
+}
+
+function clean_return_data(data){
+    if(data.pl_rade == 0 || data.pl_rade == null || data.pl_rade == ""){data.pl_rade = "N/A"}else{data.pl_rade = data.pl_rade + "x The Sun"}
+    if(data.st_rad == 0 || data.st_rad == null || data.st_rad == ""){data.st_rad = "N/A"}else{data.st_rad = data.st_rad + "x The Sun"}
+    if(data.st_mass == 0 || data.st_mass == null || data.st_mass == ""){data.st_mass = "N/A"}else{data.st_mass = data.st_mass + "x The Sun"}
+    return data;
 }
 
 /* TODO
 
-5. Table
-5a. updating table
-7. Padding for discoverymethod ticks
-8. Log scale updates (or zoom)
-9. Fix visuals
-9a. new Date() for discovery year
-10c. sorting
 12. Decoration 
 12a. theme colors
-12b. scatterplot color pallette
-12c. responsive
+12d. Help button
+12 sort out our solar system data
+12 make buttons pretty
+
 10. More information
-11. Brushing
+12c. responsive (maybe)
+12. Brushing
 ~ 3 days work
 */

@@ -8,13 +8,14 @@ class FocusContextVis {
     constructor(_config, _data, _type) {
       this.config = {
         parentElement: _config.parentElement,
-        width:  300,
+        width:  500,
         height: 200,
         contextHeight: 50,
-        margin: {top: 20, right: 10, bottom: 140, left: 45},
-        contextMargin: {top: 290, right: 10, bottom: 20, left: 45}
+        margin: {top: 30, right: 15, bottom: 135, left: 45},
+        contextMargin: {top: 250, right: 10, bottom: 20, left: 15}
       }
       this.data = _data;
+      this.type = _type;
       this.initVis();
     }
     
@@ -61,7 +62,7 @@ class FocusContextVis {
   
       vis.focus.append('defs').append('clipPath')
           .attr('id', 'clip')
-        .append('rect')
+            .append('rect')
           .attr('width', vis.config.width)
           .attr('height', vis.config.height);
       
@@ -78,6 +79,7 @@ class FocusContextVis {
       vis.tooltipTrackingArea = vis.focus.append('rect')
           .attr('width', vis.config.width)
           .attr('height', vis.config.height)
+          .attr('class', 'lineClip')
           .attr('fill', 'none')
           .attr('pointer-events', 'all');
   
@@ -156,7 +158,11 @@ class FocusContextVis {
   
       vis.focusLinePath
           .datum(vis.data)
-          .attr('d', vis.line);
+          .attr('d', vis.line)
+      
+      vis.focusLinePath.style('opacity', 0)
+        .transition().duration(1000)
+        .style('opacity', 1);
   
       vis.contextAreaPath
           .datum(vis.data)
@@ -214,6 +220,7 @@ class FocusContextVis {
   
         // Update x-scale of the focus view accordingly
         vis.xScaleFocus.domain(selectedDomain);
+
       } else {
         // Reset x-scale of the focus view (full time period)
         vis.xScaleFocus.domain(vis.xScaleContext.domain());
@@ -222,5 +229,6 @@ class FocusContextVis {
       // Redraw line and update x-axis labels in focus view
       vis.focusLinePath.attr('d', vis.line);
       vis.xAxisFocusG.call(vis.xAxisFocus);
+      //handle_filter(vis.xScaleFocus.domain(), vis.type);
     }
   }

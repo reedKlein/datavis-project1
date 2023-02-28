@@ -9,13 +9,16 @@ class Barchart {
       // Configuration object with defaults
       this.config = {
         parentElement: _config.parentElement,
-        logRange: _config.logRange || [100, 0],
+        logRange: _config.logRange || .5,
         containerWidth: _config.containerWidth || 300,
         containerHeight: _config.containerHeight || 200,
         margin: _config.margin || {top: 10, right: 10, bottom: 25, left: 40},
         logScale: _config.logScale || false,
         tooltipPadding: _config.tooltipPadding || 15
       }
+      this.colorDict = {"sy_snum": "#643e55", "sy_pnum": "#46643e", 
+                        "st_spectype": "#3b5434", "discoverymethod": "#513245",
+                        "habitability":"#32482c"}
       this.data = _data;
       this.type = _type;
       this.initVis();
@@ -39,7 +42,8 @@ class Barchart {
           .paddingInner(0.2);
   
       vis.xAxis = d3.axisBottom(vis.xScale)
-          .tickSize(0, 0);
+          .tickSize(0, 0)
+          .ticks(0);
   
       // Define size of SVG drawing area
       vis.svg = d3.select(vis.config.parentElement)
@@ -77,24 +81,20 @@ class Barchart {
       // Set variable Y scale for Logarithmic or Linear
       if (vis.config.logScale){
         vis.yScale = d3.scaleLog()
-            .range([vis.height, 0])
-        
-        vis.yAxis = d3.axisLeft(vis.yScale)
-            .ticks(6)
-            .tickSizeOuter(0);
 
-        vis.yScale.domain([20, d3.max(vis.data, vis.yValue)]);
+        vis.yScale.domain([vis.config.logRange, d3.max(vis.data, vis.yValue)]);
       }
       else{
         vis.yScale = d3.scaleLinear()
-          .range([vis.height, 0]);
-
-        vis.yAxis = d3.axisLeft(vis.yScale)
-          .ticks(6)
-          .tickSizeOuter(0);
         
         vis.yScale.domain([0, d3.max(vis.data, vis.yValue)]);
       }
+
+      vis.yScale.range([vis.height, 0]);
+
+      vis.yAxis = d3.axisLeft(vis.yScale)
+        .ticks(6)
+        .tickSizeOuter(0);
 
       vis.renderVis();
     }
@@ -104,6 +104,29 @@ class Barchart {
      */
     renderVis() {
       let vis = this;
+
+      vis.colorScale = (d) => {
+        if(vis.colorDict[d]){
+            return vis.colorDict[d];
+        }
+        return "#b7c58d";
+      }
+
+      vis.tooltipSelect = (type, d) => {
+        switch(type){
+          case "sy_snum":
+            return `<div class="tooltip-label">${d.x} star(s)</div>${d3.format(',')(d.y)} planet(s)`;
+          case "sy_pnum":
+            return `<div class="tooltip-label">${d.x} planet(s)</div>${d3.format(',')(d.y)} system(s)`;
+          case "st_spectype":
+            return `<div class="tooltip-label">star type: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
+          case "discoverymethod":
+            return `<div class="tooltip-label">method: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
+          case "habitability":
+            return `<div class="tooltip-label">status: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
+        }
+        return `<div class="tooltip-label">${type}<br>${d.x}</div>${d3.format(',')(d.y)}`;
+      }
   
       // Add rectangles
       vis.bars = vis.chart.selectAll('.bar')
@@ -113,11 +136,13 @@ class Barchart {
       vis.bars.style('opacity', 0.5)
         .transition().duration(1000)
           .style('opacity', 1)
+          .style('fill', vis.colorScale(vis.type))
           .attr('class', 'bar')
           .attr('x', d => vis.xScale(vis.xValue(d)))
           .attr('width', vis.xScale.bandwidth())
           .attr('height', d => vis.height - vis.yScale(vis.yValue(d)))
           .attr('y', d => vis.yScale(vis.yValue(d)))
+      
       
       // Tooltip event listeners
       vis.bars
@@ -125,7 +150,7 @@ class Barchart {
             d3.select('#tooltip')
               .style('opacity', 1)
               // Format number with million and thousand separator
-              .html(`<div class="tooltip-label">${vis.type}<br>${d.x}</div>${d3.format(',')(d.y)}`);
+              .html(vis.tooltipSelect(vis.type, d));
           })
           .on('mousemove', (event) => {
             d3.select('#tooltip')
@@ -136,8 +161,9 @@ class Barchart {
             d3.select('#tooltip').style('opacity', 0);
           })
           .on('click', (event, d) =>{
-            filtering_event(d, vis.type);
+            handle_filter(d, vis.type);
           });
+      
   
       // Update axes
       vis.xAxisG
@@ -147,7 +173,8 @@ class Barchart {
       if(this.type == "discoverymethod"){
         vis.xAxisG
             .selectAll("text")
-            .attr("transform", "translate(-60,45)rotate(-35)")
+            .style("text-anchor", "end")
+            .attr("transform", "translate(-5,0)rotate(-35)")
       }
   
       vis.yAxisG.call(vis.yAxis);

@@ -3,10 +3,10 @@ class Histogram{
         // Configuration object with defaults
         this.config = {
           parentElement: _config.parentElement,
-          logRange: _config.logRange || [100, 0],
-          containerWidth: _config.containerWidth || 300,
-          containerHeight: _config.containerHeight || 200,
-          margin: _config.margin || {top: 10, right: 5, bottom: 25, left: 40},
+          logRange: _config.logRange || .5,
+          containerWidth: _config.containerWidth || 320,
+          containerHeight: _config.containerHeight || 300,
+          margin: _config.margin || {top: 10, right: 15, bottom: 25, left: 40},
           logScale: _config.logScale || false,
           tooltipPadding: _config.tooltipPadding || 15
         }
@@ -22,6 +22,10 @@ class Histogram{
         vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
         vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
 
+        vis.svg = d3.select(vis.config.parentElement)
+          .attr('width', vis.config.containerWidth)
+          .attr('height', vis.config.containerHeight);
+
         // append the svg object to the body of the page
         vis.chart = d3.select(vis.config.parentElement)
         .attr("width", vis.width + vis.config.margin.left + vis.config.margin.right)
@@ -36,6 +40,8 @@ class Histogram{
         
         vis.yAxisG = vis.chart.append('g')
             .attr('class', 'axis y-axis');
+
+        
     }
 
     updateVis(){
@@ -57,9 +63,17 @@ class Histogram{
         vis.bins = vis.histogram(data);
 
         // Y axis: scale and draw:
-        vis.yScale = d3.scaleLinear()
-        .range([vis.height, 0])
-        .domain([0, d3.max(vis.bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+        if(vis.config.logScale){
+            vis.yScale = d3.scaleLog()
+            .domain([vis.config.logRange, d3.max(vis.bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+
+        }
+        else{
+            vis.yScale = d3.scaleLinear()
+            .domain([0, d3.max(vis.bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+        }
+
+        vis.yScale.range([vis.height, 0]);
 
         vis.xAxis = d3.axisBottom(vis.xScale)
             .tickFormat(d3.format('.1s'));
@@ -84,7 +98,7 @@ class Histogram{
             .attr("transform", function(d) { return "translate(" + vis.xScale(d.x0) + "," + vis.yScale(d.length) + ")"; })
             .attr("width", function(d) { return vis.xScale(d.x1) - vis.xScale(d.x0) -1 ; })
             .attr("height", function(d) { return vis.height - vis.yScale(d.length); })
-            .style("fill", "#69b3a2");
+            .style("fill", "#482c3d");
 
         rects
             // Show tooltip on hover
@@ -92,7 +106,7 @@ class Histogram{
                 d3.select('#tooltip')
                 .style('opacity', 1)
                 // Format number with million and thousand separator
-                .html(`<div class="tooltip-label">${vis.type}<br>${d.x0}-${d.x1}</div>${d3.format(',')(d.length)}`);
+                .html(`<div class="tooltip-label">${d.x0}-${d.x1} parsecs</div>${d3.format(',')(d.length)} planet(s)`);
                 })
             .on("mousemove", (event) => {
                 d3.select('#tooltip')
@@ -102,9 +116,6 @@ class Histogram{
             .on("mouseleave", () => {
                 d3.select('#tooltip').style('opacity', 0);
               })
-            .on('click', (event, d) =>{
-                console.log(d.x0, d.x1, vis.type);
-              });
         
         vis.xAxisG.call(vis.xAxis);
         vis.yAxisG.call(vis.yAxis);

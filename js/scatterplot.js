@@ -8,16 +8,18 @@ class Scatterplot {
     constructor(_config, _data, _type) {
       this.config = {
         parentElement: _config.parentElement,
-        containerWidth: _config.containerWidth || 400,
+        containerWidth: _config.containerWidth || 500,
         containerHeight: _config.containerHeight || 200,
         margin: _config.margin || {top: 10, right: 15, bottom: 30, left: 40},
         tooltipPadding: _config.tooltipPadding || 15
       }
       this.colorDict = {"Mercury": "#bebfc5", "Venus": "#fffacd", 
-                        "Earth": "#2774af", "Mars": "#903e2d",
+                        "Earth": "#1b527c", "Mars": "#903e2d",
                         "Jupiter":"#e0ab76", "Saturn": "#b4a725",
                         "Uranus": "#9eb9d4", "Neptune": "00416a"}
+      this.solr_filter = false;
       this.data = _data;
+      this.type = _type;
       this.solar_system_planets = this._create_solar_system();
       this.initVis();
     }
@@ -73,7 +75,7 @@ class Scatterplot {
           .style('text-anchor', 'end')
           .text('Radius');
   
-      vis.svg.append('text')
+      vis.svg.append('text')     
           .attr('class', 'axis-title')
           .attr('x', 0)
           .attr('y', 0)
@@ -119,29 +121,39 @@ class Scatterplot {
         if(vis.colorDict[d]){
             return vis.colorDict[d];
         }
-        return "#2a8d46";
+        return "#3e6464";
+      }
+
+      vis.solrFilter = (d) => {
+        if(vis.colorDict[d]){
+            return false;
+        }
+        return true;
+      }
+
+      vis.solrScale = (d) => {
+        if(vis.colorDict[d]){
+            return 6;
+        }
+        return 4;
       }
   
       // Add circles
+      vis.solar_system_planets.forEach(p => vis.data.push(p));
+      if(vis.solr_filter){
+        vis.data = vis.data.filter(x => {return vis.solrFilter(x.name)});
+      }
       let circles = vis.chart.selectAll('.point')
           .data(vis.data)
         .join('circle')
+          .style('cursor', 'pointer')
           .attr('class', 'point')
-          .attr('r', 4)
+          .attr('r', d => vis.solrScale(d.name))
           .attr('cy', d => {if(vis.yValue(d) < vis.yScale.domain()[0] || !vis.yValue(d)){return vis.yScale(vis.yScale.domain()[0]);} return vis.yScale(vis.yValue(d));})
           .attr('cx', d => {if(vis.xScale(vis.xValue(d)) < vis.xScale.domain()[0] || !vis.xValue(d)){return vis.xScale.domain()[0];} return vis.xScale(vis.xValue(d));})
           .attr('fill', d => vis.colorScale(d.name));
+          
 
-      let solrSystems = vis.chart.selectAll('.solarSystem')
-          .data(vis.solar_system_planets)
-        .join('circle')
-          .attr('class', 'solarSystem')
-          .attr('r', 4)
-          .attr('cy', d => {if(vis.yValue(d) < vis.yScale.domain()[0] || !vis.yValue(d)){return vis.yScale(vis.yScale.domain()[0]);} return vis.yScale(vis.yValue(d));})
-          .attr('cx', d => {if(vis.xScale(vis.xValue(d)) < vis.xScale.domain()[0] || !vis.xValue(d)){return vis.xScale.domain()[0];} return vis.xScale(vis.xValue(d));})
-          .attr('fill', d => vis.colorScale(d.name));
-      // Tooltip event listeners
-      
       circles
           .on('mouseover', (event,d) => {
             d3.select('#tooltip')
@@ -149,8 +161,8 @@ class Scatterplot {
               .html(`
                 <div class="tooltip-title">${d.name}</div>
                 <ul>
-                  <li>Radius: ${d.x}</li>
-                  <li>Mass ${d.y}</li>
+                  <li>Radius: ${d.x}x</li>
+                  <li>Mass ${d.y}x</li>
                 </ul>
               `);
           })
@@ -161,27 +173,11 @@ class Scatterplot {
           })
           .on('mouseleave', () => {
             d3.select('#tooltip').style('opacity', 0);
-          });
-
-        solrSystems
-          .on('mouseover', (event,d) => {
-            d3.select('#tooltip')
-              .style('opacity', 1)
-              .html(`
-                <div class="tooltip-title">${d.name}</div>
-                <ul>
-                  <li>Radius: ${d.x}</li>
-                  <li>Mass ${d.y}</li>
-                </ul>
-              `);
           })
-          .on("mousemove", (event) => {
-            d3.select('#tooltip')
-              .style('left', (event.pageX + vis.config.tooltipPadding) + 'px')   
-              .style('top', (event.pageY + vis.config.tooltipPadding) + 'px')
-          })
-          .on('mouseleave', () => {
-            d3.select('#tooltip').style('opacity', 0);
+          .on('click', (event, d) =>{
+            if(vis.solrFilter(d.name)){
+                populate_info_modal(d.name);
+            }
           });
       
       // Update the axes/gridlines
