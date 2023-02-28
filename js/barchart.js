@@ -112,6 +112,7 @@ class Barchart {
         return "#b7c58d";
       }
 
+      // Format tooltip for barchart types
       vis.tooltipSelect = (type, d) => {
         switch(type){
           case "sy_snum":

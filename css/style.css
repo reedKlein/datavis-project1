@@ -193,6 +193,16 @@ html body {
   overflow-y: scroll;
 }
 
+.imodal-content {
+  background-color: #d6d6d5;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 70%;
+  height: 50%;
+  overflow-y: scroll;
+}
+
 /* The Close Button */
 .close {
   color: #aaaaaa;

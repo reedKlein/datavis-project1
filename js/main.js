@@ -1,9 +1,11 @@
 /**
  * Load data from CSV file asynchronously and render bar chart
  */
-var sy_snum_barchart;
+
 // Initialize chart and then show it
+var sy_snum_barchart;
 var charts = [];
+// Array to simplify formatting
 var noformat_barcharts = ['sy_snum', 'sy_pnum', 'discoverymethod', 'habitability'];
 d3.csv('data/exoplanets-1.csv')
   .then(data => {
@@ -19,11 +21,11 @@ d3.csv('data/exoplanets-1.csv')
       d.disc_year = new Date(d.disc_year);
       init_table_data.push({name: d.pl_name, distance: d.sy_dist.toString() + " ps", disc_year: d.disc_year.getUTCFullYear()});
     });
+    // Format all_data array to compare rest of filtered arrays
     all_data = data;
     selected_filters = [];
     filter_stars(all_data);
     add_habitable();
-    console.log(data[0]);
     
     sy_snum_barchart = new Barchart({ parentElement: '#sy_snum_chart', 
                                     logRange: .5}, 
@@ -75,6 +77,7 @@ d3.csv('data/exoplanets-1.csv')
                                     "radius_mass");
     charts.push(radius_mass_scatterplot);
 
+    // create tabulator table
     table = new Tabulator("#data_table", {
         layout: "fitColumns",
         responsiveLayout:true,
@@ -87,30 +90,26 @@ d3.csv('data/exoplanets-1.csv')
             {title:"Discovery Year", field:"disc_year", width: 130}
         ]
     })
+
+    // listen for clicks to update modal
     table.on("rowClick", function(e, row){
         tselect_data = row.getData().name;
         populate_info_modal(tselect_data);
         
     })
 
+    // Sort and update charts to initial dataset
     charts.forEach(chart => {
         custom_sort(chart);
+        chart.updateVis();
     });
-
-    sy_snum_barchart.updateVis();
-    sy_pnum_barchart.updateVis();
-    st_spectype_barchart.updateVis();
-    discoverymethod_barchart.updateVis();
-    habitable_barchart.updateVis();
-    distance_histogram.updateVis();
-    disc_year_linechart.updateVis();
-    radius_mass_scatterplot.updateVis();
 
   })
   .catch(error => {
         console.error(error);
   });
 
+// Sort per chart
 function custom_sort(chart){
     if(chart.type == "st_spectype"){
         chart.data.sort((a, b) => {
@@ -126,6 +125,7 @@ function custom_sort(chart){
     return;
 }
 
+// Add habitability data to all_data array
 function add_habitable(){
     all_data.forEach(d => {
         d.habitability = "uninhabitable";
@@ -140,10 +140,10 @@ function add_habitable(){
             d.habitability = "undefined";
         }
     });
-
     return all_data;
 }
 
+// Get star data from star string
 function filter_stars(data){
     let spectypes = ['A', 'F', 'G', 'K', 'M'];
     data.forEach( d => {
@@ -169,30 +169,7 @@ function format_scatterplot(data){
     return objArr;
 }
 
-// Bar Charts Buttons
-d3.select('#sy_snum_sorting').on('click', d => {
-    sy_snum_barchart.data.reverse();
-    sy_snum_barchart.updateVis();
-})
-d3.select('#sy_pnum_sorting').on('click', d => {
-    sy_pnum_barchart.data.reverse();
-    sy_pnum_barchart.updateVis();
-})
-d3.select('#st_spectype_sorting').on('click', d => {
-    st_spectype_barchart.data.reverse();
-    st_spectype_barchart.updateVis();
-})
-d3.select('#discoverymethod_sorting').on('click', d => {
-    discoverymethod_barchart.data.reverse();
-    discoverymethod_barchart.updateVis();
-})
-d3.select('#habitable_sorting').on('click', d => {
-    habitable_barchart.data.reverse();
-    habitable_barchart.updateVis();
-})
-
-// logscale
-
+// Event listeners for styling and functionality
 d3.select('#sy_snum_logScale').on('click', d=> {
     let ele = d3.select('#sy_snum_logScale')
     if(ele.classed('selected')){ele.classed('selected', false)}
@@ -244,12 +221,13 @@ d3.select('#solr_filter').on('click', d=> {
 });
 
 
-
+// Clear selection button functionality
 function clearSelect(){
     selected_filters = [];
     filtering_event(all_data);
 }
 
+// update table and charts with filtered data
 function filtering_event(filtered_data){
     table.setData(format_tabulator(filtered_data));
     charts.forEach(chart => {
@@ -280,6 +258,7 @@ function filtering_event(filtered_data){
     })
 }
 
+// handle interaction with filter
 function handle_filter(d, field){
     update_selection(d, field);
     filtered_data = all_data;
@@ -291,6 +270,7 @@ function handle_filter(d, field){
     filtering_event(filtered_data);
 }
 
+// update selection for multi select
 function update_selection(d, field){
     if(selected_filters.length == 0){
         selected_filters.push({"field": field, "d": d});
@@ -311,6 +291,7 @@ function update_selection(d, field){
     }
 }
 
+// format data for tabulator intake
 function format_tabulator(data){
     let tabulator_data = [];
     data.forEach(d => {
@@ -322,11 +303,11 @@ function format_tabulator(data){
 
 // Help Modal
 var modal = document.getElementById("help_modal");
+// Help button
 var help = document.getElementById("help");
 var close = document.getElementsByClassName("close")[0];
 var close2 = document.getElementsByClassName("close")[1];
 info_modal = document.getElementById("info_modal");
-var temp = document.getElementById("temporary");
 
 help.onclick = function(){
     modal.style.display = "block";
@@ -341,16 +322,12 @@ window.onclick = function(event) {
         info_modal.style.display = "none";
     }
 }
-
-temp.onclick = function(){
-    populate_info_modal(all_data[0]);
-    info_modal.style.display = "block";
-}
 close2.onclick = function(){
     modal.style.display = "none";
     info_modal.style.display = "none";
 }
 
+// handle and populate information modal for exoplanets
 function populate_info_modal(pl_name){
     let data = all_data.filter(x => {return x.pl_name == pl_name});
     data = clean_return_data(data);
@@ -373,6 +350,7 @@ function populate_info_modal(pl_name){
     info_modal.style.display = "block";
 }
 
+// Planet type calculation
 function get_planet_type(data){
     if(data.pl_bmasse >= 50){
         return "Gas Giant - Jovian"
@@ -398,23 +376,10 @@ function get_planet_type(data){
     return "N/A"
 }
 
+// Clean data before display
 function clean_return_data(data){
     if(data.pl_rade == 0 || data.pl_rade == null || data.pl_rade == ""){data.pl_rade = "N/A"}else{data.pl_rade = data.pl_rade + "x The Sun"}
     if(data.st_rad == 0 || data.st_rad == null || data.st_rad == ""){data.st_rad = "N/A"}else{data.st_rad = data.st_rad + "x The Sun"}
     if(data.st_mass == 0 || data.st_mass == null || data.st_mass == ""){data.st_mass = "N/A"}else{data.st_mass = data.st_mass + "x The Sun"}
     return data;
 }
-
-/* TODO
-
-12. Decoration 
-12a. theme colors
-12d. Help button
-12 sort out our solar system data
-12 make buttons pretty
-
-10. More information
-12c. responsive (maybe)
-12. Brushing
-~ 3 days work
-*/

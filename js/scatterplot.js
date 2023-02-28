@@ -191,6 +191,7 @@ class Scatterplot {
           .call(g => g.select('.domain').remove())
     }
 
+    // create array of just Earth solar system data
     _create_solar_system(){
       let objArr = []
       objArr.push({"name": "Mercury", "x": .383, "y": .0553});
