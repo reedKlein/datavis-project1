@@ -333,10 +333,10 @@ function populate_info_modal(pl_name){
     data = clean_return_data(data);
     let planetName = pl_name;
     let planetType = get_planet_type(data[0]);
-    let planetRad = data[0].pl_rade + "x Earth";
+    let planetRad = data[0].pl_rade;
     let starType = data[0].st_spectype;
-    let starRad = data[0].st_rad + "x The Sun";
-    let starMass = data[0].st_mass + "x The Sun";
+    let starRad = data[0].st_rad;
+    let starMass = data[0].st_mass;
     let habitability = data[0].habitability;
 
     document.getElementById("RHeader").innerHTML = planetName;
@@ -370,7 +370,7 @@ function get_planet_type(data){
     if(data.pl_bmasse >= .00001){
         return "Minor Planet - Mercurian"
     }
-    if(data.pl_bmasse <= .00001){
+    if(data.pl_bmasse <= .00001 && data.pl_bmasse > 0){
         return "Minor Planet - Asteroidan"
     }
     return "N/A"
@@ -378,8 +378,8 @@ function get_planet_type(data){
 
 // Clean data before display
 function clean_return_data(data){
-    if(data.pl_rade == 0 || data.pl_rade == null || data.pl_rade == ""){data.pl_rade = "N/A"}else{data.pl_rade = data.pl_rade + "x The Sun"}
-    if(data.st_rad == 0 || data.st_rad == null || data.st_rad == ""){data.st_rad = "N/A"}else{data.st_rad = data.st_rad + "x The Sun"}
-    if(data.st_mass == 0 || data.st_mass == null || data.st_mass == ""){data.st_mass = "N/A"}else{data.st_mass = data.st_mass + "x The Sun"}
+    if(data[0].pl_rade == 0 || data[0].pl_rade == null || data[0].pl_rade == ""){data[0].pl_rade = "N/A"}else{data[0].pl_rade = data[0].pl_rade + "x The Sun"}
+    if(data[0].st_rad == 0 || data[0].st_rad == null || data[0].st_rad == ""){data[0].st_rad = "N/A"}else{data[0].st_rad = data[0].st_rad + "x The Sun"}
+    if(data[0].st_mass == 0 || data[0].st_mass == null || data[0].st_mass == ""){data[0].st_mass = "N/A"}else{data[0].st_mass = data[0].st_mass + "x The Sun"}
     return data;
 }

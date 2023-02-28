@@ -1,4 +1,4 @@
-# Data Vis Project 1
+# Data Vis Project 1 - Out of this World
 
 ## How to Run:
 
