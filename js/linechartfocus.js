@@ -229,6 +229,6 @@ class FocusContextVis {
       // Redraw line and update x-axis labels in focus view
       vis.focusLinePath.attr('d', vis.line);
       vis.xAxisFocusG.call(vis.xAxisFocus);
-      //handle_filter(vis.xScaleFocus.domain(), vis.type);
+      //handleFilter(vis.xScaleFocus.domain(), vis.type);
     }
   }

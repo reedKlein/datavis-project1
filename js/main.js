@@ -6,7 +6,7 @@
 var sy_snum_barchart;
 var charts = [];
 // Array to simplify formatting
-var noformat_barcharts = ['sy_snum', 'sy_pnum', 'discoverymethod', 'habitability'];
+var noformatBarcharts = ['sy_snum', 'sy_pnum', 'discoverymethod', 'habitability'];
 d3.csv('data/exoplanets-1.csv')
   .then(data => {
     var init_table_data = [];
@@ -24,26 +24,26 @@ d3.csv('data/exoplanets-1.csv')
     // Format all_data array to compare rest of filtered arrays
     all_data = data;
     selected_filters = [];
-    filter_stars(all_data);
-    add_habitable();
+    filterStars(all_data);
+    addHabitable();
     
     sy_snum_barchart = new Barchart({ parentElement: '#sy_snum_chart', 
                                     logRange: .5}, 
-                                    format_barchart(data, "sy_snum"), 
+                                    formatBarchart(data, "sy_snum"), 
                                     "sy_snum"); // d3 rollup length of values from sy_snum
     charts.push(sy_snum_barchart);
 
     sy_pnum_barchart = new Barchart({ parentElement: '#sy_pnum_chart', 
                                     logRange: .5
                                     }, 
-                                    format_barchart(data, "sy_pnum"), 
+                                    formatBarchart(data, "sy_pnum"), 
                                     "sy_pnum");
     charts.push(sy_pnum_barchart);
 
     st_spectype_barchart = new Barchart({ parentElement: '#st_spectype_chart', 
                                     logRange: .5,
                                     containerHeight: 300}, 
-                                    format_barchart(data, "st_spectype"), 
+                                    formatBarchart(data, "st_spectype"), 
                                     "st_spectype");
     charts.push(st_spectype_barchart);
 
@@ -52,13 +52,13 @@ d3.csv('data/exoplanets-1.csv')
                                     margin: {top: 10, right: 5, bottom: 100, left: 40},
                                     containerHeight: 300,
                                     containerWidth: 400},
-                                    format_barchart(data, "discoverymethod"), 
+                                    formatBarchart(data, "discoverymethod"), 
                                     "discoverymethod");
     charts.push(discoverymethod_barchart);
 
     habitable_barchart = new Barchart({ parentElement: '#habitable_barchart',
                                         containerHeight:300}, 
-                                    format_barchart(data, "habitability"),
+                                    formatBarchart(data, "habitability"),
                                     "habitability");
     charts.push(habitable_barchart);
 
@@ -68,24 +68,24 @@ d3.csv('data/exoplanets-1.csv')
     charts.push(distance_histogram);
 
     disc_year_linechart = new FocusContextVis({ parentElement: '#disc_year_chart'}, 
-                                    format_barchart(data, "disc_year"), 
+                                    formatBarchart(data, "disc_year"), 
                                     "disc_year");
     charts.push(disc_year_linechart);
 
     radius_mass_scatterplot = new Scatterplot({ parentElement: '#radius_mass_chart'}, 
-                                    format_scatterplot(data),
+                                    formatScatterplot(data),
                                     "radius_mass");
     charts.push(radius_mass_scatterplot);
 
     // create tabulator table
     table = new Tabulator("#data_table", {
         layout: "fitColumns",
-        responsiveLayout:true,
+        responsiveLayout: true,
         data: init_table_data,
         pagination: "local",
         paginationSize: 15,
         columns:[
-            {title:"Name", field:"name", minWidth: 100},
+            {title:"Name", field:"name", width: 100},
             {title:"Distance from Earth", field:"distance", width: 160},
             {title:"Discovery Year", field:"disc_year", width: 130}
         ]
@@ -94,13 +94,13 @@ d3.csv('data/exoplanets-1.csv')
     // listen for clicks to update modal
     table.on("rowClick", function(e, row){
         tselect_data = row.getData().name;
-        populate_info_modal(tselect_data);
+        populateInfoModal(tselect_data);
         
     })
 
     // Sort and update charts to initial dataset
     charts.forEach(chart => {
-        custom_sort(chart);
+        customSort(chart);
         chart.updateVis();
     });
 
@@ -110,7 +110,7 @@ d3.csv('data/exoplanets-1.csv')
   });
 
 // Sort per chart
-function custom_sort(chart){
+function customSort(chart){
     if(chart.type == "st_spectype"){
         chart.data.sort((a, b) => {
                         if(a.x < b.x){ return -1}
@@ -126,7 +126,7 @@ function custom_sort(chart){
 }
 
 // Add habitability data to all_data array
-function add_habitable(){
+function addHabitable(){
     all_data.forEach(d => {
         d.habitability = "uninhabitable";
         if(d.st_spectype == "A" && d.pl_orbsmax >= 8.5 && d.pl_orbsmax <= 12.5 ||
@@ -144,7 +144,7 @@ function add_habitable(){
 }
 
 // Get star data from star string
-function filter_stars(data){
+function filterStars(data){
     let spectypes = ['A', 'F', 'G', 'K', 'M'];
     data.forEach( d => {
         if(spectypes.includes(d.st_spectype)){
@@ -155,13 +155,13 @@ function filter_stars(data){
 }
 
 // Create an object from rolled up data and assign it to templated "x" and "y" fields
-function format_barchart(data, field){
+function formatBarchart(data, field){
     data_rollup = d3.rollup(data, v => v.length, d => d[field])
     let myObjStruct = Object.assign(Array.from(data_rollup).map(([k, v]) => ({"x": k, "y" : v})));
     return myObjStruct;
 }
 
-function format_scatterplot(data){
+function formatScatterplot(data){
     let objArr = [];
     data.forEach( d => {
         objArr.push({"name": d.pl_name, "x": d.pl_rade, "y": d.pl_bmasse});
@@ -224,21 +224,21 @@ d3.select('#solr_filter').on('click', d=> {
 // Clear selection button functionality
 function clearSelect(){
     selected_filters = [];
-    filtering_event(all_data);
+    filteringEvent(all_data);
 }
 
 // update table and charts with filtered data
-function filtering_event(filtered_data){
-    table.setData(format_tabulator(filtered_data));
+function filteringEvent(filtered_data){
+    table.setData(formatTabulator(filtered_data));
     charts.forEach(chart => {
-        if(noformat_barcharts.includes(chart.type)){
-            chart.data = format_barchart(filtered_data, chart.type);
-            custom_sort(chart);
+        if(noformatBarcharts.includes(chart.type)){
+            chart.data = formatBarchart(filtered_data, chart.type);
+            customSort(chart);
             chart.updateVis();
         }
         if(chart.type == "st_spectype"){
-            chart.data = format_barchart(filtered_data, "st_spectype")
-            custom_sort(chart);
+            chart.data = formatBarchart(filtered_data, "st_spectype")
+            customSort(chart);
             chart.updateVis();
         }
         if(chart.type == "sy_dist"){
@@ -246,36 +246,36 @@ function filtering_event(filtered_data){
             chart.updateVis();
         }
         if(chart.type == "disc_year"){
-            chart.data = format_barchart(filtered_data, chart.type);
-            custom_sort(chart);
+            chart.data = formatBarchart(filtered_data, chart.type);
+            customSort(chart);
             chart.updateVis();
         }
         if(chart.type == "radius_mass"){
-            chart.data = format_scatterplot(filtered_data, chart.type);
-            custom_sort(chart);
+            chart.data = formatScatterplot(filtered_data, chart.type);
+            customSort(chart);
             chart.updateVis();
         }
     })
 }
 
 // handle interaction with filter
-function handle_filter(d, field){
-    update_selection(d, field);
+function handleFilter(d, field){
+    updateSelection(d, field);
     filtered_data = all_data;
     selected_filters.forEach( filter => {
-        if(noformat_barcharts.includes(filter.field) || filter.field == "st_spectype"){
+        if(noformatBarcharts.includes(filter.field) || filter.field == "st_spectype"){
             filtered_data = filtered_data.filter(x => {return x[filter.field] == filter.d['x']});
         }
     })
-    filtering_event(filtered_data);
+    filteringEvent(filtered_data);
 }
 
 // update selection for multi select
-function update_selection(d, field){
+function updateSelection(d, field){ //push filter
     if(selected_filters.length == 0){
         selected_filters.push({"field": field, "d": d});
     }
-    else{
+    else{ // remove filter
         let index = 0
         let newFilter = true;
         selected_filters.forEach( filter =>{
@@ -292,7 +292,7 @@ function update_selection(d, field){
 }
 
 // format data for tabulator intake
-function format_tabulator(data){
+function formatTabulator(data){
     let tabulator_data = [];
     data.forEach(d => {
         tabulator_data.push({name: d.pl_name, distance: d.sy_dist.toString() + " ps", disc_year: d.disc_year.getUTCFullYear()});
@@ -328,11 +328,11 @@ close2.onclick = function(){
 }
 
 // handle and populate information modal for exoplanets
-function populate_info_modal(pl_name){
+function populateInfoModal(pl_name){
     let data = all_data.filter(x => {return x.pl_name == pl_name});
-    data = clean_return_data(data);
+    data = cleanReturnData(data);
     let planetName = pl_name;
-    let planetType = get_planet_type(data[0]);
+    let planetType = getPlanetType(data[0]);
     let planetRad = data[0].pl_rade;
     let starType = data[0].st_spectype;
     let starRad = data[0].st_rad;
@@ -351,7 +351,7 @@ function populate_info_modal(pl_name){
 }
 
 // Planet type calculation
-function get_planet_type(data){
+function getPlanetType(data){
     if(data.pl_bmasse >= 50){
         return "Gas Giant - Jovian"
     }
@@ -377,8 +377,8 @@ function get_planet_type(data){
 }
 
 // Clean data before display
-function clean_return_data(data){
-    if(data[0].pl_rade == 0 || data[0].pl_rade == null || data[0].pl_rade == ""){data[0].pl_rade = "N/A"}else{data[0].pl_rade = data[0].pl_rade + "x The Sun"}
+function cleanReturnData(data){
+    if(data[0].pl_rade == 0 || data[0].pl_rade == null || data[0].pl_rade == ""){data[0].pl_rade = "N/A"}else{data[0].pl_rade = data[0].pl_rade + "x The Earth"}
     if(data[0].st_rad == 0 || data[0].st_rad == null || data[0].st_rad == ""){data[0].st_rad = "N/A"}else{data[0].st_rad = data[0].st_rad + "x The Sun"}
     if(data[0].st_mass == 0 || data[0].st_mass == null || data[0].st_mass == ""){data[0].st_mass = "N/A"}else{data[0].st_mass = data[0].st_mass + "x The Sun"}
     return data;

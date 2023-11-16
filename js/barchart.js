@@ -162,7 +162,7 @@ class Barchart {
             d3.select('#tooltip').style('opacity', 0);
           })
           .on('click', (event, d) =>{
-            handle_filter(d, vis.type);
+            handleFilter(d, vis.type);
           });
       
   
