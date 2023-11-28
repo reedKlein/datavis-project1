@@ -13,7 +13,7 @@ class Scatterplot {
         margin: _config.margin || {top: 10, right: 15, bottom: 30, left: 40},
         tooltipPadding: _config.tooltipPadding || 15
       }
-      this.colorDict = {"Mercury": "#bebfc5", "Venus": "#fffacd", 
+      this.color_dictionary = {"Mercury": "#bebfc5", "Venus": "#fffacd", 
                         "Earth": "#1b527c", "Mars": "#903e2d",
                         "Jupiter":"#e0ab76", "Saturn": "#b4a725",
                         "Uranus": "#9eb9d4", "Neptune": "00416a"}
@@ -29,7 +29,6 @@ class Scatterplot {
      */
     initVis() {
       let vis = this;
-      var data = this.data;
   
       // Calculate inner chart size. Margin specifies the space around the actual chart.
       vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
@@ -118,21 +117,21 @@ class Scatterplot {
       let vis = this;
 
       vis.colorScale = (d) => {
-        if(vis.colorDict[d]){
-            return vis.colorDict[d];
+        if(vis.color_dictionary[d]){
+            return vis.color_dictionary[d];
         }
         return "#3e6464";
       }
 
       vis.solrFilter = (d) => {
-        if(vis.colorDict[d]){
+        if(vis.color_dictionary[d]){
             return false;
         }
         return true;
       }
 
       vis.solrScale = (d) => {
-        if(vis.colorDict[d]){
+        if(vis.color_dictionary[d]){
             return 6;
         }
         return 4;
@@ -176,7 +175,7 @@ class Scatterplot {
           })
           .on('click', (event, d) =>{
             if(vis.solrFilter(d.name)){
-                populate_info_modal(d.name);
+              populateInfoModal(d.name);
             }
           });
       
@@ -193,15 +192,15 @@ class Scatterplot {
 
     // create array of just Earth solar system data
     _create_solar_system(){
-      let objArr = []
-      objArr.push({"name": "Mercury", "x": .383, "y": .0553});
-      objArr.push({"name": "Venus", "x": .95, "y": .815});
-      objArr.push({"name": "Earth", "x": 1, "y": 1});
-      objArr.push({"name": "Mars", "x": .532, "y": .107});
-      objArr.push({"name": "Jupiter", "x": 11, "y": 318});
-      objArr.push({"name": "Saturn", "x": 9.1, "y": 95.2});
-      objArr.push({"name": "Uranus", "x": 4, "y": 14.5});
-      objArr.push({"name": "Neptune", "x": 3.9, "y": 17.1});
-      return objArr;
+      let object_array = []
+      object_array.push({"name": "Mercury", "x": .383, "y": .0553});
+      object_array.push({"name": "Venus", "x": .95, "y": .815});
+      object_array.push({"name": "Earth", "x": 1, "y": 1});
+      object_array.push({"name": "Mars", "x": .532, "y": .107});
+      object_array.push({"name": "Jupiter", "x": 11, "y": 318});
+      object_array.push({"name": "Saturn", "x": 9.1, "y": 95.2});
+      object_array.push({"name": "Uranus", "x": 4, "y": 14.5});
+      object_array.push({"name": "Neptune", "x": 3.9, "y": 17.1});
+      return object_array;
     }
   }

@@ -39,7 +39,7 @@ class Table {
             // cell.onclick = () => console.log(i);
            
             // (C4) BREAK INTO NEXT ROW
-            var next = i + 1;
+            let next = i + 1;
             if (next%perrow==0 && next!=data.length) { row = table.insertRow(); }
           });
         

@@ -17,7 +17,6 @@ class Histogram{
 
     initVis(){
         let vis = this;
-        var data = this.data;
         // set the dimensions and margins of the graph
         vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
         vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
@@ -46,16 +45,16 @@ class Histogram{
 
     updateVis(){
         let vis = this;
-        var data = this.data;
+        let data = this.data;
 
          // X axis: scale and draw:
          vis.xScale = d3.scaleLinear()
-         .domain([0, d3.max(data, function(d) { return +d.sy_dist })])     //Update tomain in updates
+         .domain([0, d3.max(data, function(d) { return +d.system_distance_from_earth })])     //Update tomain in updates
          .range([0, vis.width]);
 
         // set the parameters for the histogram
         vis.histogram = d3.histogram()
-        .value(function(d) { return d.sy_dist; })   // I need to give the vector of value
+        .value(function(d) { return d.system_distance_from_earth; })   // I need to give the vector of value
         .domain(vis.xScale.domain())  // then the domain of the graphic
         .thresholds(vis.xScale.ticks(30)); // then the numbers of bins
 

@@ -16,8 +16,8 @@ class Barchart {
         logScale: _config.logScale || false,
         tooltipPadding: _config.tooltipPadding || 15
       }
-      this.colorDict = {"sy_snum": "#643e55", "sy_pnum": "#46643e", 
-                        "st_spectype": "#3b5434", "discoverymethod": "#513245",
+      this.colorDict = {"system_star_number": "#643e55", "system_planet_number": "#46643e", 
+                        "star_spectype": "#3b5434", "discoverymethod": "#513245",
                         "habitability":"#32482c"}
       this.data = _data;
       this.type = _type;
@@ -115,11 +115,11 @@ class Barchart {
       // Format tooltip for barchart types
       vis.tooltipSelect = (type, d) => {
         switch(type){
-          case "sy_snum":
+          case "system_star_number":
             return `<div class="tooltip-label">${d.x} star(s)</div>${d3.format(',')(d.y)} planet(s)`;
-          case "sy_pnum":
+          case "system_planet_number":
             return `<div class="tooltip-label">${d.x} planet(s)</div>${d3.format(',')(d.y)} system(s)`;
-          case "st_spectype":
+          case "star_spectype":
             return `<div class="tooltip-label">star type: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
           case "discoverymethod":
             return `<div class="tooltip-label">method: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;

@@ -86,17 +86,17 @@ html body {
     margin-right: auto;
   }
 
-  #sy_snum_container{
+  #system_star_number_container{
     grid-column: 1;
     grid-row: 1;
   }
 
-  #sy_pnum_container{
+  #system_planet_number_container{
     grid-column: 3;
     grid-row: 1;
   }
 
-  #st_spectype_container{
+  #star_spectype_container{
     grid-column: 3;
     grid-row: 2;
   }
@@ -116,7 +116,7 @@ html body {
     grid-row: 3;
   }
 
-  #disc_year_container{
+  #discovery_year_container{
     grid-column: 2;
     grid-row: 3;
   }
